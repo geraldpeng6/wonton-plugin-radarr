@@ -1,43 +1,28 @@
-# 云吞插件模板
+# 电影下载（Radarr）
 
-开发流程见[插件开发指南](https://github.com/wontonapp/wonton-docs/blob/main/develop.md)。
+把想看的电影加进片单，Radarr 会自动搜索、下载、按电影名整理进媒体库，配好 Jellyfin 打开就能看。下载客户端（qBittorrent 插件）和通知邮件装好即接好。
 
-这是一个能安装的示例插件 `app.example.hello`：使用 nginx 官方镜像显示问候页，经网关的 `sso: proxy` 注入用户名，页面显示“你好，<用户名>”。示例没有应用账号、持久化数据或 MCP 工具。
+## 用法
 
-## 示例文件
+1. 装好后打开插件网页，把想看的电影加进片单（搜索片名 → 选质量 → 加入）。
+2. 装了 qBittorrent 插件的，下载自动进它的队列，下完自动整理进共享文件夹 `media` 的 `movies/` 目录。
+3. 电影下好、质量升级或有健康问题时，收件人的 Wonton 私聊里会收到一封通知邮件。
 
-| 路径 | 内容 |
+## 配套插件
+
+| 插件 | 关系 |
 | --- | --- |
-| `docker-compose.yml` | 示例清单、nginx 服务和三个 `configs` |
-| `web/default.conf.template` | nginx 配置，启用 SSI 回显用户名并提供健康检查入口；只放行来自核心地址（`${WONTON_CORE_ADDRESS}`）的请求，其余来源 403 |
-| `web/index.html` | 问候页 |
-| `web/tokens.css` | 页面主题变量的后备值 |
-| `tabs/` | 示例主页的应用页面图标 |
-| `screenshots/home.png` | 商店详情页的示例截图 |
-| `scripts/smoke-probes.sh` | 检查真实页面和网关注入身份的插件探针 |
+| qBittorrent | 下载客户端，把种子下到共享文件夹 `downloads`，Radarr 从那里导入 |
+| Prowlarr | 索引站统一管理，自动把索引器同步给 Radarr |
+| Jellyfin | 播放 `media` 共享文件夹里的电影库 |
+| Seerr | 家里人在上面求片，Radarr 负责下载（待插件间依赖支持） |
 
-从模板创建自己的插件后，替换示例清单、网页和素材；具体步骤见[写插件](https://github.com/wontonapp/wonton-docs/blob/main/develop.md#写插件)。
+## 说明
 
-## 对着别的栈跑探针
-
-`probes`、`api`、`session` 按 `.wonton/.env` 的 `WONTON_BASE_DOMAIN` 拼核心地址，`up` 起的栈自己写这个键。插件装进别人的栈、或者对着已有环境排查时，把那套栈的基础域名写进 `.wonton/.env`，不要只按实例名猜地址：实例名只是资源名前缀，网关按 Host 认域名，拼错了会回“没有安装”。
-
-```bash
-WONTON_BASE_DOMAIN=wonton.localhost
-```
-
-## 核心镜像
-
-检查和冒烟默认用套件里的核心镜像（`ghcr.io/wontonapp/wonton-core:main`）；要固定别的核心镜像，在仓库 Settings → Variables 设 `WONTON_CORE_IMAGE`，手动触发“检查”时填的 `core-image` 输入优先。
-
-## 更新开发套件
-
-```bash
-scripts/dev.sh kit-update
-```
-
-在从模板新建的插件仓库中更新套件；本仓库是套件源头，执行时只提示并退出。版本、可选引用和自定义脚本约定见[开发指南](https://github.com/wontonapp/wonton-docs/blob/main/develop.md#更新开发套件)。
+- 网页经云吞网关打开，家人要用先在 App 里共享；应用自己不再设账号密码。
+- 搜索元数据（api.radarr.video、TMDB）需要能访问外网，装的时候会确认这项权限。
+- 电影数据保存在家里（应用数据和 `media` 共享文件夹），卸载时选保留就还在。
 
 ## 图标
 
-`icon.svg` 是本仓库原创线条图标，按本仓库 MIT 许可证分发，见 [NOTICE](NOTICE)。
+`icon.png` 用 Radarr 官方标志（[GitHub 组织头像](https://github.com/Radarr)，取自 radarr.video），放在白底上缩放而成；Radarr 名称与标志是 Radarr 项目的商标，见 [NOTICE](NOTICE)。

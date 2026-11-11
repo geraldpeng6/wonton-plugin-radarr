@@ -1,7 +1,14 @@
-图标
-====
+Radarr 图标与名称
+==================
 
-`icon.svg` 为本仓库原创，按插件规范的线条风格手写，未用图片模型生成。从模板新建的插件换成自己的图标时，这里按实际情况重写。
+本插件的 `icon.png` 使用 Radarr 项目的官方标志（GitHub 组织头像，
+https://github.com/Radarr ，亦见 https://radarr.video ）。原标志为透明底，
+本插件把它等比放在白色底上并缩放到 512×512，未改色、未变形、未与其他图形拼接。
+
+Radarr 标志的版权归 Radarr 项目（https://github.com/Radarr/Radarr ，GPL-3.0-only）
+所有。Radarr 名称与标志是 Radarr 项目的商标。本插件与 Radarr 项目无隶属或背书关系。
+
+本插件对标志的使用仅为标识所对应的上游软件，不构成对商标的专有主张。
 
 许可证
 ------
