@@ -38,7 +38,11 @@ radarr_session() { # 自铸核心会话：网关认出用户才转发 sso:none �
   # 升级保数据的 data_write 都跑在套件 web_login 之前，jar 里还没有核心会话，先用主人令牌换一个
   # （同 prowlarr 探针；来源白名单只免主人的浏览器，不免这里的程序化请求）。
   local web jar token base
-  web="${E2E_WEB_URL:-${SMOKE_WEB_URL:?SMOKE_WEB_URL 未导出}}"
+  web="${E2E_WEB_URL:-${SMOKE_WEB_URL:-}}"
+  if [[ -z "$web" ]] && declare -F probes_web_url >/dev/null; then
+    probes_web_url && web="$SMOKE_WEB_URL"   # data_check 单独跑时没人备好 SMOKE_WEB_URL，这里自己拿
+  fi
+  web="${web:?SMOKE_WEB_URL 拿不到}"
   web="${web%/}"
   jar="${E2E_JAR:-${SMOKE_JAR:?SMOKE_JAR 未导出}}"
   token="${E2E_TOKEN:-${SMOKE_TOKEN:-}}"
@@ -91,6 +95,9 @@ SMOKE_NOTE="应用是 External 认证：不做应用内登录，身份由网关�
 
 data_write() { # 加一部电影（The Matrix）并打上一个随机标签，作为要保住的用户数据
   local out tag tag_id qp old old_tag created
+  # 会话要在本壳里铸好：radarr_api_ready 的命令替换子壳里 export 的 SMOKE_WEB_URL 传不回父壳，
+  # 后面管道里的 web_get 会 unbound
+  radarr_session || return 1
   out="$(radarr_api_ready)" || return 1
 
   # 幂等：上一次探针留下的同部影片和旧标签先删掉（只删库记录，不删文件）
@@ -123,6 +130,7 @@ data_write() { # 加一部电影（The Matrix）并打上一个随机标签，�
 
 data_check() { # 升级/重装后：标记里的影片还在、还在监控，标签也在
   local marker_tmdb marker_tag list item
+  radarr_session || return 1   # 同 data_write：先在本壳铸会话，SMOKE_WEB_URL 才进得了本壳
   marker_tmdb="$(radarr_cred tmdbid)"
   marker_tag="$(radarr_cred tag)"
   [[ -n "$marker_tmdb" ]] || { echo "标记里没有数据（data_write 没跑？）"; return 1; }
